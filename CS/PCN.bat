@@ -52,10 +52,7 @@ echo ) >> build.bat
 echo cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319 >> build.bat
 echo csc -out:"%%cur_dir%%\program.exe" %%fileList%% >> build.bat
 echo cd %%cur_dir%% >> build.bat
-echo IF EXIST program.exe (start "program.exe" "program.exe") ELSE ( >> build.bat
-echo echo build failed >> build.bat
-echo pause >> build.bat
-echo ) >> build.bat
+echo IF EXIST program.exe (start "program.exe" "program.exe") ELSE ( echo build failed && pause ) >> build.bat
 echo exit >> build.bat
 
 
@@ -68,4 +65,5 @@ cd src
 start %SYSTEMROOT%\notepad.exe "%CD%\main.cs"
 start "" "%CD%"
 cd ..\
+
 start "" "%CD%"
