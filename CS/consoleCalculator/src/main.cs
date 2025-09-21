@@ -1,4 +1,3 @@
-#pragma warning disable CA1416, CS8600
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -56,38 +55,37 @@ public class Program
 		}
         	ConsoleSetup();
 
-		List<string> TokenList = new List<string>();	
-		
+		List<string> TokenList = new List<string>();
+
 		while (true)
 		{
 			Console.WriteLine("Console Calculator, please write the expression below to be calculated:");
-            		string inputStream = Console.ReadLine();
-           			if (inputStream != null)
-                			TokenList = Tokenize(inputStream);
-            		foreach (string token in TokenList)
-                		Console.WriteLine(token);
-			if(CheckSyntax(TokenList);
+			string inputStream = Console.ReadLine();
+			if (inputStream != null)
+				TokenList = Tokenize(inputStream);
+			foreach (string token in TokenList)
+				Console.WriteLine(token);
+			if (CheckSyntax(TokenList)) 
 				Console.WriteLine(ExpressionCalculate(TokenList, 0, TokenList.Count));
-			else
+			else {
 				Console.WriteLine("Syntax error");
-			
-        	}
-	
+			}
+		}
 		
 	}
 	public static double Add(double a, double b)
 	{
 		return a+b;	
 	}
-	public static double Sub(double a, double b)
+	public static double Subtract(double a, double b)
 	{
 		return a-b;
 	}
-	public static double Mult(double a, double b)
+	public static double Multiply(double a, double b)
 	{
 		return a*b;
 	}
-	public static double Div(double a, double b)
+	public static double Divide(double a, double b)
 	{
 		return a/b;
 	}
@@ -139,39 +137,58 @@ public class Program
 				
 			}
 		}
+		tokenListConCat.Add(temp); //add last missing token
 		
 		return tokenListConCat;
 	}
-	public static double ExpressionCalculate(List<string> tokenizedList, int startIndex, int lastIndex)
+	public static bool ExpressionCalculate(List<string> tokenizedList, int startIndex, int lastIndex)
 	{
 		double result = 0;
 
 		//
-		
-			
-	
+
+		int[] positions = SearchForPairedTokens(tokenizedList);
+		for (int i = 0; i < positions.Length; i++)
+		{
+			if (positions[i] != 0)
+			{
+				Console.WriteLine(i + " " + positions[i]);
+			}
+		}
 		//
 
-		return result;
+		return true;
 	}
-	public static int[] SearchForSpecificTokens(List<string> tokenizedList, List<string> seekedTokens, bool pairedToken = false)
+	public static int[] SearchForPairedTokens(List<string> tokenizedList)
 	{
-		for(int i = 0; i < tokenizedList.Count; i++)
+		int[] positions = new int[tokenizedList.Count+1]; for (int i = 0; i< tokenizedList.Count; i++) { positions[i] = 0; } // 13+(16-4-[7+7*{6-2}])*12=-263
+		string[] keys = { "(", "[", "{" , ")", "]", "}" }; //1, 2, 3, 4, 5, 6
+		int[] keyPairs = new int[6];
+		for (int i = 0; i < tokenizedList.Count; i++)
 		{
-			
+			for (int j = 0; j < 6; j++)
+			{
+				if (tokenizedList[i] == keys[j]) { positions[i] = j + 1; keyPairs[j]++; }
+			}
 		}
+		if (keyPairs[0] != keyPairs[3]) { Console.WriteLine("Syntax error, missing )?"); positions[positions.Length - 1] = -1; }
+		if (keyPairs[1] != keyPairs[4]) { Console.WriteLine("Syntax error, missing ]?"); positions[positions.Length - 1] = -1; }
+		if (keyPairs[2] != keyPairs[5]) { Console.WriteLine("Syntax error, missing }?"); positions[positions.Length - 1] = -1; }
+		return positions;
 	}
 
 	public static bool CheckSyntax(List<string> tokenizedList)
 	{
+		//TODO>fix paired tokens
+		//TODO>add pair check
 		string[] keys = { "+", "^", "*", "/", "-" };
-		for(int i = 0; i < tokenizedList.Count-1; i++)
+		for (int i = 0; i < tokenizedList.Count - 1; i++)
 		{
-			for(int j = 0; j < keys.Length; j++)
+			for (int j = 0; j < keys.Length; j++)
 			{
-				for(int n = 0; n < keys.Length-1; n++)
+				for (int n = 0; n < keys.Length - 1; n++)
 				{
-					if(tokenizedList[i] == keys[j] && tokenizedList[i+1] == keys[n])
+					if (tokenizedList[i] == keys[j] && tokenizedList[i + 1] == keys[n])
 						return false;
 				}
 			}
