@@ -6,11 +6,11 @@ public class Program
 {
 	public static void Main(string[] args)
 	{
-		
+
 		int posx = 10;
 		int posy = 0;
 		while (true)
-		{			
+		{
 			posx = 10;
 			Console.Write("password: ");
 			string password = null;
@@ -25,17 +25,17 @@ public class Program
 				if (key.Key == ConsoleKey.Backspace && password != null)
 				{
 					string tempPass = null;
-					Console.SetCursorPosition(posx-1, posy);
+					Console.SetCursorPosition(posx - 1, posy);
 					Console.Write(" ");
-					Console.SetCursorPosition(posx-1, posy);
-					for(int i = 0; i < password.Length - 1; i++)
+					Console.SetCursorPosition(posx - 1, posy);
+					for (int i = 0; i < password.Length - 1; i++)
 					{
 						tempPass += password[i];
 					}
 					password = tempPass;
 					posx--;
 					continue;
-				}				
+				}
 				Console.Write('*');
 				password += key.KeyChar;
 				posx++;
@@ -53,7 +53,7 @@ public class Program
 				Console.WriteLine("\nWrong password");
 			}
 		}
-        	ConsoleSetup();
+		ConsoleSetup();
 
 		List<string> TokenList = new List<string>();
 
@@ -65,35 +65,39 @@ public class Program
 				TokenList = Tokenize(inputStream);
 			foreach (string token in TokenList)
 				Console.WriteLine(token);
-			if (CheckSyntax(TokenList)) 
+			if (CheckSyntax(TokenList))
 				Console.WriteLine(ExpressionCalculate(TokenList, 0, TokenList.Count));
 			else {
 				Console.WriteLine("Syntax error");
 			}
 		}
-		
+
 	}
 	public static double Add(double a, double b)
 	{
-		return a+b;	
+		return a + b;
 	}
 	public static double Subtract(double a, double b)
 	{
-		return a-b;
+		return a - b;
 	}
 	public static double Multiply(double a, double b)
 	{
-		return a*b;
+		return a * b;
 	}
 	public static double Divide(double a, double b)
 	{
-		return a/b;
+		return a / b;
+	}
+	public static double Exponent(double a, double b)
+	{
+		return Math.Pow(a, b);
 	}
 	public static void ConsoleSetup()
 	{
-		Console.SetWindowSize(1,1);
-		Console.SetBufferSize(120,120);
-		Console.SetWindowSize(75,18);
+		Console.SetWindowSize(1, 1);
+		Console.SetBufferSize(120, 120);
+		Console.SetWindowSize(75, 18);
 		Console.BackgroundColor = ConsoleColor.DarkBlue;
 		Console.ForegroundColor = ConsoleColor.White;
 		Console.Title = "Calculator";
@@ -141,13 +145,15 @@ public class Program
 		
 		return tokenListConCat;
 	}
-	public static bool ExpressionCalculate(List<string> tokenizedList, int startIndex, int lastIndex)
+	public static double ExpressionCalculate(List<string> tokenizedList, int startIndex, int lastIndex)
 	{
 		double result = 0;
 
 		//
 
 		int[] positions = SearchForPairedTokens(tokenizedList);
+		if (positions[positions.Length - 1] == -1) return 0;
+		
 		for (int i = 0; i < positions.Length; i++)
 		{
 			if (positions[i] != 0)
@@ -157,7 +163,7 @@ public class Program
 		}
 		//
 
-		return true;
+		return result;
 	}
 	public static int[] SearchForPairedTokens(List<string> tokenizedList)
 	{
@@ -179,7 +185,6 @@ public class Program
 
 	public static bool CheckSyntax(List<string> tokenizedList)
 	{
-		//TODO>fix paired tokens
 		//TODO>add pair check
 		string[] keys = { "+", "^", "*", "/", "-" };
 		for (int i = 0; i < tokenizedList.Count - 1; i++)
