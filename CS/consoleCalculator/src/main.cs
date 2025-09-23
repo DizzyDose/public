@@ -17,8 +17,7 @@ public class Program
 			if (inputStream != null)
 				TokenList = Tokenize(inputStream);			
 			if (CheckSyntax(TokenList))
-				Console.WriteLine(ExpressionCalculate(TokenList));
-			
+				ExpressionCalculate(TokenList);			
 			else
 			{
 				Console.WriteLine("Syntax error");
@@ -98,7 +97,7 @@ public class Program
 
 		return tokenListConCat;
 	}
-	public static double ExpressionCalculate(List<string> tokenizedList)
+	public static void ExpressionCalculate(List<string> tokenizedList)
 	{
 		double result = 0;
 
@@ -144,8 +143,16 @@ public class Program
 								RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
 								break;
 							case 4:
-								temp = Divide(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
-								RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+								if (Convert.ToDouble(tokenizedList[i + 1]) != 0)
+								{
+									temp = Divide(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
+									RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+								}
+								else
+								{
+									Console.WriteLine("Math Error");
+									return;
+								}
 								break;
 						}
 					}
@@ -188,8 +195,16 @@ public class Program
 								RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
 								break;
 							case 4:
-								temp = Divide(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
-								RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+								if (Convert.ToDouble(tokenizedList[i + 1]) != 0)
+								{
+									temp = Divide(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
+									RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+								}
+								else
+								{
+									Console.WriteLine("Math Error");
+									return;
+								}
 								break;
 						}
 					}
@@ -229,7 +244,7 @@ public class Program
 
 		//
 
-		return result;
+		Console.WriteLine(result);
 	}
 	public static int[] SearchForOperands(List<string> tokenizedList)
 	{
