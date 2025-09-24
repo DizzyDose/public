@@ -7,9 +7,7 @@ public class Program
 	public static void Main(string[] args)
 	{
 		ConsoleSetup();
-
 		List<string> TokenList = new List<string>();
-
 		while (true)
 		{
 			Console.WriteLine("Console Calculator, please write the expression below to be calculated:");
@@ -23,7 +21,6 @@ public class Program
 				Console.WriteLine("Syntax error");
 			}
 		}
-
 	}
 	public static double Add(double a, double b)
 	{
@@ -66,7 +63,6 @@ public class Program
 				continue;
 			tokenList.Add(character);
 		}
-
 		List<string> tokenListConCat = new List<string>();
 		foreach (char character in tokenList)
 		{
@@ -94,14 +90,11 @@ public class Program
 			}
 		}
 		tokenListConCat.Add(temp); //add last missing token
-
 		return tokenListConCat;
 	}
 	public static void ExpressionCalculate(List<string> tokenizedList)
 	{
 		double result = 0;
-
-		//
 		int[] PriorityTokenPositions = SearchForPriorityTokens(tokenizedList);
 		int[] OperandPositions = SearchForOperands(tokenizedList);
 		int pos1 = 0; int pos2 = 0;
@@ -248,9 +241,6 @@ public class Program
 			}
 		}
 		result = Convert.ToDouble(tokenizedList[0]);
-
-		//
-
 		Console.WriteLine(result);
 	}
 	public static int[] SearchForOperands(List<string> tokenizedList)
@@ -345,9 +335,6 @@ public class Program
 				return false;
 			}
 		}
-
-
-
 		for (int i = 0; i < tokenizedList.Count - 1; i++)
 		{
 			for (int j = 0; j < keys.Length; j++)
