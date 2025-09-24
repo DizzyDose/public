@@ -15,9 +15,9 @@ public class Program
 			Console.WriteLine("Console Calculator, please write the expression below to be calculated:");
 			string inputStream = Console.ReadLine();
 			if (inputStream != null)
-				TokenList = Tokenize(inputStream);			
-			if (CheckSyntax(TokenList))
-				ExpressionCalculate(TokenList);			
+				TokenList = Tokenize(inputStream);
+			if (CheckSyntax(ref TokenList))
+				ExpressionCalculate(TokenList);
 			else
 			{
 				Console.WriteLine("Syntax error");
@@ -106,7 +106,7 @@ public class Program
 		int[] OperandPositions = SearchForOperands(tokenizedList);
 		int pos1 = 0; int pos2 = 0;
 		double temp;
-		while (tokenizedList.Count != 1)
+		while (tokenizedList.Count != 1 && !(tokenizedList.Count == 2 && tokenizedList[1] == "" && tokenizedList[0] != ""))
 		{
 			for (int i = 0; i < tokenizedList.Count; i++)
 			{
@@ -174,17 +174,20 @@ public class Program
 				}
 			}
 			else // with brackets
-			{				
-				for (int i = pos2 - 1; i > pos1; i--)
+			{
+				bool stop = false;
+				CheckIsolatedNegative(ref tokenizedList, ref PriorityTokenPositions, ref OperandPositions);
+				for (int i = pos2 - 1; i > pos1 && !stop; i--)
 				{
 					if (PriorityTokenPositions[i] == 2)
 					{
 						temp = Exponent(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
 						RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+						stop = true;
 					}
 				}
 				OperandPositions = SearchForOperands(tokenizedList);
-				for (int i = pos1; i < pos2; i++)
+				for (int i = pos1; i < pos2 && !stop; i++)
 				{
 					if (PriorityTokenPositions[i] == 1)
 					{
@@ -193,12 +196,14 @@ public class Program
 							case 3:
 								temp = Multiply(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
 								RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+								stop = true;
 								break;
 							case 4:
 								if (Convert.ToDouble(tokenizedList[i + 1]) != 0)
 								{
 									temp = Divide(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
 									RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+									stop = true;
 								}
 								else
 								{
@@ -210,35 +215,37 @@ public class Program
 					}
 				}
 				OperandPositions = SearchForOperands(tokenizedList);
-				for (int i = pos1; i < pos2; i++)
+				for (int i = pos1; i < pos2 && !stop; i++)
 				{
 					switch (OperandPositions[i])
 					{
 						case 1:
 							temp = Add(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
 							RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+							stop = true;
 							break;
 						case 2:
 							temp = Subtract(Convert.ToDouble(tokenizedList[i - 1]), Convert.ToDouble(tokenizedList[i + 1]));
 							RemoveAndUpdate(temp, ref tokenizedList, i, ref PriorityTokenPositions, ref OperandPositions);
+							stop = true;
 							break;
 					}
 				}
 				for (int i = 0; i < tokenizedList.Count; i++)
 				{
-				    if (PriorityTokenPositions[i] == 3)
-				    {
-				        pos1 = i;
-				    }
-				    if (PriorityTokenPositions[i] == 4)
-				    {
-				        pos2 = i;
-				        break;
-				    }
+					if (PriorityTokenPositions[i] == 3)
+					{
+						pos1 = i;
+					}
+					if (PriorityTokenPositions[i] == 4)
+					{
+						pos2 = i;
+						break;
+					}
 				}
-				RemoveAndUpdateBrackets(ref tokenizedList, ref PriorityTokenPositions, ref OperandPositions, pos1, pos2);			
+				if (pos2 - pos1 == 2) RemoveAndUpdateBrackets(ref tokenizedList, ref PriorityTokenPositions, ref OperandPositions, pos1, pos2);
 				pos1 = 0; pos2 = 0;
-			} 
+			}
 		}
 		result = Convert.ToDouble(tokenizedList[0]);
 
@@ -327,26 +334,33 @@ public class Program
 		return PriorityTokenPositions;
 	}
 
-	public static bool CheckSyntax(List<string> tokenizedList)
+	public static bool CheckSyntax(ref List<string> tokenizedList)
 	{
 		string[] keys = { "+", "^", "*", "/", "-" };
-		
-		for (int i = 0; i < keys.Length; i++)
+
+		for (int i = 0; i < keys.Length; i++) // check if ends with +-*/^
 		{
-			if (tokenizedList[tokenizedList.Count-2] == keys[i] && tokenizedList[tokenizedList.Count-1] == "")
+			if (tokenizedList[tokenizedList.Count - 2] == keys[i] && tokenizedList[tokenizedList.Count - 1] == "")
 			{
 				return false;
 			}
 		}
 
+
+
 		for (int i = 0; i < tokenizedList.Count - 1; i++)
 		{
 			for (int j = 0; j < keys.Length; j++)
 			{
-				for (int n = 0; n < keys.Length - 1; n++)
+				for (int n = 0; n < keys.Length; n++)
 				{
 					if (tokenizedList[i] == keys[j] && tokenizedList[i + 1] == keys[n])
-						return false;
+						if (n == 4)
+						{
+							string temp = "-" + tokenizedList[i + 2];
+							tokenizedList.RemoveRange(i + 1, 2);
+							tokenizedList.Insert(i + 1, temp);
+						}
 				}
 			}
 		}
@@ -363,9 +377,23 @@ public class Program
 	public static void RemoveAndUpdateBrackets(ref List<string> tokenizedList, ref int[] PriorityTokenPositions, ref int[] OperandPositions, int pos1, int pos2)
 	{
 		tokenizedList.RemoveAt(pos2);
-		tokenizedList.RemoveAt(pos1);		
+		tokenizedList.RemoveAt(pos1);
 		PriorityTokenPositions = SearchForPriorityTokens(tokenizedList);
 		OperandPositions = SearchForOperands(tokenizedList);
 
+	}
+	public static void CheckIsolatedNegative(ref List<string> tokenizedList, ref int[] PriorityTokenPositions, ref int[] OperandPositions)
+	{
+		for (int i = 0; i < tokenizedList.Count - 3; i++)
+		{
+			if (PriorityTokenPositions[i] == 3 && tokenizedList[i + 1] == "-" && PriorityTokenPositions[i + 3] == 4)
+			{
+				string temp = tokenizedList[i + 2];
+				tokenizedList.RemoveRange(i + 1, 2);
+				tokenizedList.Insert(i + 1, "-" + temp);
+				PriorityTokenPositions = SearchForPriorityTokens(tokenizedList);
+				OperandPositions = SearchForOperands(tokenizedList);
+			}
+		}
 	}
 }
